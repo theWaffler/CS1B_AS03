@@ -1,8 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <limits>
 #include <string>
-//#include <iomanip>
+#include <iomanip>
 //#include functions.h
 //#include myheader.h
 
@@ -39,6 +40,19 @@ struct MovieNode
     int rating;
     string synopsis;
     MovieNode *next;
+
+    MovieNode()
+    {
+        title = "empty";
+        lead = "empty";
+        support = "empty";
+        genre = "empty";
+        altGenre = "empty";
+        year = 0;
+        rating = 0;
+        synopsis = "empty";
+    }
+            
 };
 
 enum command {EXIT = 0, OUTPUT = 1, TITLE = 2, GENRE = 3, LEAD = 4, YEAR = 5, RATING = 6};
@@ -80,63 +94,191 @@ MovieNode *Create(MovieNode *head)
     return head;
 }
 
-void Display(MovieNode *head)
+void Display(MovieNode *head, ostream &outFile)
 {
-    cout << "\n\nMovie List:" << endl << endl;
+    //cout << "\n\nMovie List:" << endl << endl;
+    int count = 0;
     MovieNode* perPtr = head;
+    //output to console
+    cout << "\n\nCOMPLETE MOVIE LISTING"<< endl;
+    cout << "MOVIE#" << setw(6) << "TITLE" << setw(65) << "YEAR " << setw(7) << "RATING" << setw(7) << "GENRE" << setw(22) << "ALT GENRE" << setw(20)<< "LEAD ACTOR" << setw(35) << "SUPPORTING ACTOR" << endl;
+    cout << "------" << setw(8) << " ---------------------------------------------------------------" << setw(6) << "----"<< setw(8) << "------" << setw(16) << "--------------" << setw(21) << "-----------------" << setw(29) << "----------------------------" << setw(33) << "--------------------------------" << endl;
+    
+    //output to file
+    outFile << "\n\nCOMPLETE MOVIE LISTING"<< endl;
+    outFile << "MOVIE#" << setw(6) << "TITLE" << setw(65) << "YEAR " << setw(7) << "RATING" << setw(7) << "GENRE" << setw(20) << "ALT GENRE" << setw(20)<< "LEAD ACTOR" << setw(35) << "SUPPORTING ACTOR" << endl;
+    outFile << "------" << setw(8) << " ---------------------------------------------------------------" << setw(6) << "----"<< setw(8) << "------" << setw(16) << "--------------" << setw(20) << "------------------" << setw(29) << "----------------------------" << setw(33) << "--------------------------------" << endl;
     while (perPtr!= NULL)
     {
-        cout << "Title: " << perPtr->title << endl;
-        cout << "Actor(Lead): " << perPtr->lead << endl;
-        cout << "Actor (Support)" << perPtr->support << endl;    
-        cout << "Genre: " << perPtr->genre << endl;
-        cout << "Alt Genre: " << perPtr->altGenre << endl;
-        cout << "Year: " << perPtr->year << endl;
-        cout << "Rating: " << perPtr->rating << endl;
-        cout << "Synopsis: " << perPtr->synopsis << endl << endl;
+        string str;
+        string temp;
+        str = perPtr->title;
+        temp = str.substr(0, 45);
+        
+        count++;
+        // output to console
+        cout << right;
+        cout << setw(3) << count;
+        cout << left;
+        cout << setw(4) << "";
+        cout << setw(65) << temp;
+        cout << setw(8) << perPtr->year;
+        cout << setw(6) << perPtr->rating;
+        cout << setw(18) << perPtr->genre;
+        cout << setw(18) << perPtr->altGenre;
+        cout << setw(29) << perPtr->lead;
+        cout << setw(20) << perPtr->support << endl;
+        
+        // output to file
+        outFile << right;
+        outFile << setw(3) << count;
+        outFile << left;
+        outFile << setw(4) << "";
+        outFile << setw(65) << temp;
+        outFile << setw(8) << perPtr->year;
+        outFile << setw(6) << perPtr->rating;
+        outFile << setw(16) << perPtr->genre;
+        outFile << setw(20) << perPtr->altGenre;
+        outFile << setw(29) << perPtr->lead;
+        outFile << setw(20) << perPtr->support << endl;
+        
         perPtr = perPtr->next;
     }
-    delete perPtr; // deletes pointer
+    delete perPtr; // deletes pointerd
+}
+
+void textWrap(MovieNode *head)
+{
+    int i= 0;
+    string temp;
+    string wtxt;
+    MovieNode *textWrap;
+    textWrap = head;
+
+    temp = textWrap->synopsis;
+
+    while(i < temp.size())
+        {
+            int j = i + 120;
+            if(j > temp.size())
+                j = temp.size();
+            while (j > i && temp[j] !=' ')
+                j--;
+            if (j == i)
+                j = i + 120;
+            cout << temp.substr(i, j-i);
+            i = j + 1;
+        }
 }
 
 /**
  * This function is to search the list of movies included in the inFile.txt
  * function does not return anything to main 
  */
-bool Search(MovieNode *head, ofstream& outFile)
+void SearchTitle(MovieNode *head, ostream &outFile)
 {
-    string stitle; // IN - the movie title the user inputed
-    bool check; // OUT - checks to see if the movie is found
-    MovieNode *perPtr; // OUT - pointer to search the list
-    perPtr = head;
+  string searchTitle; // INPUT - the name to be searched - INPUT
+  MovieNode *search; // OUTPUT - the pointer to search the list - OUTPUT
+  search = head; // pointer to the first node
 
-    cout << "What title are you looking for? /n";
-    getline(cin, stitle);
-    cout << endl << endl;
-    cout << "Searching for the title: " << stitle << endl;
+  if (search == NULL)
+  {
+      cout << "Can't search an empty list! " << endl;
+  }
+  else 
+  {
+    cout << "What movie would you like to search for? ";
+    cin.ignore(1000, '\n');
+    getline(cin, searchTitle);
 
-    while (perPtr != NULL)
+    cout << "Searching for " << searchTitle << "..." << endl << endl;
+    while (search != NULL) 
     {
-        if (perPtr->title.compare(stitle) == 0)
+      if (search->title.compare(searchTitle) == 0) 
+      {
+        string wtxt; // OUT - wrapped text
+        wtxt = search->synopsis;
+        int i= 0; 
+        cout << "Found the movie " << searchTitle << "!" << endl;
+        outFile << "***************************************************************************" << endl;
+        outFile << "Title: "<< search->title << endl;
+        outFile << "---------------------------------------------------------------------------" << endl;
+        outFile << "Year: " << search->year << setw(20) << "Rating: " << search->rating << endl;
+        outFile << "---------------------------------------------------------------------------" << endl;
+        outFile << "Leading Actor: " << search->lead << setw(20) << "Genre 1: " << search->genre << endl;
+        outFile << "Supporting Actor: " << search->support << setw(20) << "Genre 2: " << search->altGenre << endl;
+        outFile << "---------------------------------------------------------------------------" << endl;
+        outFile << "PLOT: " << endl; 
+        while (i < wtxt.size())
         {
-            check = true;
-            //cout << "Found the movie " << perPtr->title << endl;
-        } else
-        {
-            perPtr = perPtr->next;
+            int j = i + 85;
+            if (j > wtxt.size())
+                j = wtxt.size();
+            while (j > i && wtxt[j] != ' ')
+                j--;
+            if (j == i)
+                j = i + 85;
+            outFile << wtxt.substr(i, j - i) << endl;
+            i = j + 1;
         }
+          outFile << "***************************************************************************" << endl;
+          outFile << endl << endl;
+          break;
+      } else
+      {
+        search = search->next;
+      }
+      if (search == NULL)
+        cout << "Sorry, the movie " << searchTitle << " was not found." << endl;
     }
+    search = NULL;
+    delete search;
+  }
+}
 
-    if (perPtr == NULL)
+void SearchGenre(MovieNode *head, ostream &outFile)
+{
+    string searchGenre; // IN 
+    string searchAltGenre; // IN
+    MovieNode *search; // OUT
+    search = head; // pointer to the first node
+    int count =0;
+
+    if (search == NULL)
     {
-        check = false;
+        cout << "Can't search an empty list! " << endl;
     }
+    else
+    {
+        cout << "What genre would you like to search for? ";
+        cin.ignore(1000, '\n');
+        //getline(cin, searchGenre);
+        cin >> searchGenre; 
+        cin >> searchAltGenre;
 
-    perPtr = NULL;
-    delete perPtr;
-
-    return check;
-
+        cout << "Searching for " << searchGenre << endl << endl;
+        while (search!= NULL)
+        {
+            string combined = search->genre + search->altGenre;
+            if (combined == searchGenre || combined == searchAltGenre || combined == searchGenre + searchAltGenre)
+            {
+                count ++;
+                cout << "Found " << count << " for the genre, " << searchGenre << " "<< searchAltGenre << endl;
+                break;
+            }
+            else
+            {
+                search = search->next;
+            }    
+            
+          if (search == NULL)
+          {
+              cout << "Sorry, no movies for the genre, " << searchGenre << " " << searchAltGenre << " were found." << endl;
+          }
+        }
+    search = NULL;
+    delete search;
+    }
 }
 
 int main()
@@ -147,7 +289,8 @@ int main()
     ofstream outFile; // OUT - output file
     string fileIn; // IN - Name of the input file being used
     string fileOut; // OUT - Name of the output file
-    bool sTitle; // IN - used to search based on title
+    bool titleCheck; // OUT - used to check if movie title is in the list
+    string stitle; // IN - the movie title the user inputed
     string sGenre; // IN - used to search based on genre
     string sLead; // IN - used to search based on lead
     int sYear; // IN - used to search based on year
@@ -212,27 +355,17 @@ int main()
                      * Calls on the function Display(MovieNode *head) 
                      * function will display the loaded inFile.txt for the user
                     */
-                    Display(head);
+                    Display(head, outFile);
                     break;
 
                     case TITLE:
                     /*
-                     * bool function (T/F)
-                     * return true - if title of the movie is found - output move to Ofile.txt
-                     *             - cout << "Found the movie " << title << " !"
-                     * return false - if title of the movie is NOT found
-                     *              - cout << "Sorry, the movie " << title << " was not found." 
-                     */     
-                    sTitle = Search(head, outFile);
-                    if(sTitle)
-                    {
-                        cout << "Found the movie " << head->title << endl;
-                        outFile << head->title;
-                    }
-                    else
-                    {
-                        cout << "Sorry, the movie " << "''" << head->title << "''" << " was not found.";
-                    }
+                     * If title of the movie is found - output move to Ofile.txt
+                     * cout << "Found the movie " << title << " !"
+                     * If title of the movie is NOT found
+                     * cout << "Sorry, the movie " << title << " was not found." 
+                     */ 
+                    SearchTitle(head, outFile);
                     break;
 
                     case GENRE:
@@ -244,16 +377,17 @@ int main()
                      *              - cout << "Sorry, no movies for the genre " << genre << were found
                      *  
                     */
+                    SearchGenre(head, outFile);
                     break;
 
                     case YEAR:
-                    /**
-                     * bool function (T/F)
-                     * return true - YEAR of movie is found - output movie to Ofile.txt
+                    /*
+                     * YEAR of movie is found - output movie to Ofile.txt
                      *             - cout how many movie that match the year searched for
                      *             - cout << "Found " << year << " for the year " << 
-                     *  return false - YEAR of movie NOT found
+                     *  YEAR of movie NOT found
                      */
+                    break;
 
                     
                 }
