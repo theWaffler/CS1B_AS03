@@ -155,6 +155,7 @@ int main()
             cout << "6 - Rating Search (0-9)\n";
             cout << "0 - EXIT\n";
             cout << "Enter command: ";
+
             cin >> command;
 
             switch (command)
@@ -201,7 +202,7 @@ int main()
                      * return true - YEAR of movie is found - output movie to Ofile.txt
                      *             - cout how many movie that match the year searched for
                      *             - cout << "Found " << year << " for the year " << 
-                     * 
+                     *  return false - YEAR of movie NOT found
                      */
 
                     
