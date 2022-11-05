@@ -36,12 +36,6 @@ int main()
     ofstream outFile; // OUT - output file
     string fileIn; // IN - Name of the input file being used
     string fileOut; // OUT - Name of the output file
-    bool titleCheck; // OUT - used to check if movie title is in the list
-    string stitle; // IN - the movie title the user inputed
-    string sGenre; // IN - used to search based on genre
-    string sLead; // IN - used to search based on lead
-    int sYear; // IN - used to search based on year
-    int rating; // IN - used to search based on rating
 
     command = -1;
     
